@@ -21,3 +21,8 @@ $RECYCLE.BIN/
 # =========================
 # Operating System Files
 # =========================
+
+MasyuSolver/bin
+MasyuSolver/obj
+*.suo
+.vs
