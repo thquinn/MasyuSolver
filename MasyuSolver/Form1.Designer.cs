@@ -31,6 +31,7 @@
             this.masyuPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.masyuPanel.BackColor = System.Drawing.Color.White;
             this.masyuPanel.Location = new System.Drawing.Point(12, 12);
             this.masyuPanel.Name = "masyuPanel";
             this.masyuPanel.Size = new System.Drawing.Size(960, 537);
@@ -43,7 +44,7 @@
             this.ClientSize = new System.Drawing.Size(984, 561);
             this.Controls.Add(this.masyuPanel);
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "Masyu Solver";
             this.ResumeLayout(false);
 
         }

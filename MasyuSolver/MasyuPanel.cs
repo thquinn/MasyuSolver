@@ -25,14 +25,15 @@ namespace MasyuSolver {
             board = new MasyuBoard(boardWidth, boardHeight);
         }
 
-        protected override void OnMouseClick(MouseEventArgs e) {
+
+        protected override void OnMouseDown(MouseEventArgs e) {
             base.OnMouseClick(e);
             int x = (int)Math.Floor((e.X - xBorder) / cellSize);
             int y = (int)Math.Floor((e.Y - yBorder) / cellSize);
             if (x < 0 || x >= boardWidth || y < 0 || y >= boardHeight) {
                 return;
             }
-            board.SetCircle(x, y, ModifierKeys == Keys.Shift ? MasyuCircle.WHITE : MasyuCircle.BLACK);
+            board.SetCircle(x, y, e.Button == MouseButtons.Right || ModifierKeys == Keys.Shift ? MasyuCircle.WHITE : MasyuCircle.BLACK);
             Invalidate();
         }
 
