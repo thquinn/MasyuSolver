@@ -35,9 +35,6 @@ namespace MasyuSolver {
         }
     }
 
-    public enum MasyuCircle {
-        NONE, BLACK, WHITE
-    }
     public enum MasyuEdge {
         UNKNOWN, EDGE, X
     }
