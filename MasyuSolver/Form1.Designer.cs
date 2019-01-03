@@ -64,14 +64,14 @@
             this.masyuPanel.BackColor = System.Drawing.Color.White;
             this.masyuPanel.Location = new System.Drawing.Point(12, 12);
             this.masyuPanel.Name = "masyuPanel";
-            this.masyuPanel.Size = new System.Drawing.Size(960, 495);
+            this.masyuPanel.Size = new System.Drawing.Size(960, 960);
             this.masyuPanel.TabIndex = 0;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(984, 519);
+            this.ClientSize = new System.Drawing.Size(984, 984);
             this.Controls.Add(this.masyuPanel);
             this.Menu = this.mainMenu1;
             this.Name = "Form1";

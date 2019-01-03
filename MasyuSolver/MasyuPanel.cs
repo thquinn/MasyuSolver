@@ -14,7 +14,7 @@ namespace MasyuSolver {
         static float BORDER_PERCENT = .125f;
         static float WHITE_CIRCLE_OUTLINE_PERCENT = .066f;
 
-        MasyuBoard2 board;
+        MasyuBoard board;
         int boardWidth, boardHeight;
         float cellSize, xBorder, yBorder;
 
@@ -22,9 +22,9 @@ namespace MasyuSolver {
             ResizeRedraw = true;
             InitializeComponent();
 
-            boardWidth = 13;
-            boardHeight = 15;
-            board = new MasyuBoard2(boardWidth, boardHeight);
+            boardWidth = 14;
+            boardHeight = 24;
+            board = new MasyuBoard(boardWidth, boardHeight);
         }
 
 
@@ -83,7 +83,7 @@ namespace MasyuSolver {
             }
 
             // Draw horizontal lines and Xs.
-            Pen xPen = new Pen(Color.Black, Math.Max(1, cellSize / 20));
+            Pen xPen = new Pen(Color.FromArgb(125, 125, 125), Math.Max(1, cellSize / 20));
             for (int x = 0; x < boardWidth - 1; x++)
             {
                 for (int y = 0; y < boardHeight; y++)

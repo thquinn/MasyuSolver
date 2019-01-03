@@ -28,7 +28,7 @@ namespace MasyuSolver
                     {
                         continue;
                     }
-                    int index = Array.IndexOf(MasyuBoard2.CHARS, c);
+                    int index = Array.IndexOf(MasyuBoard.CHARS, c);
                     Debug.Assert(index > 0);
                     output.Add(new Tuple<int, int, byte>(x, y, (byte)index));
                 }
@@ -68,6 +68,41 @@ namespace MasyuSolver
                 }
             }
             return output.ToArray();
+        }
+        public static int[] GetPathNeighbors(int x, int y, int width, int height) {
+            bool horizontal = y % 2 == 1;
+            List<int> pathNeighbors = new List<int>();
+            if (x >= 2 && y >= 2) {
+                pathNeighbors.Add(XYToIndex(x - 1, y - 1, width));
+            }
+            if (x >= 2 && y <= height - 3) {
+                pathNeighbors.Add(XYToIndex(x - 1, y + 1, width));
+            }
+            if (x <= width - 3 && y >= 2) {
+                pathNeighbors.Add(XYToIndex(x + 1, y - 1, width));
+            }
+            if (x <= width - 3 && y <= height - 3) {
+                pathNeighbors.Add(XYToIndex(x + 1, y + 1, width));
+            }
+            if (horizontal) {
+                if (x >= 3) {
+                    pathNeighbors.Add(XYToIndex(x - 2, y, width));
+                }
+                if (x <= width - 4) {
+                    pathNeighbors.Add(XYToIndex(x + 2, y, width));
+                }
+            } else {
+                if (y >= 3) {
+                    pathNeighbors.Add(XYToIndex(x, y - 2, width));
+                }
+                if (y <= height - 4) {
+                    pathNeighbors.Add(XYToIndex(x, y + 2, width));
+                }
+            }
+            return pathNeighbors.ToArray();
+        }
+        private static int XYToIndex(int x, int y, int width) {
+            return y * width + x;
         }
     }
 }

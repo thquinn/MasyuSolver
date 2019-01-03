@@ -52,7 +52,6 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="MasyuBoard.cs" />
-    <Compile Include="MasyuBoard2.cs" />
     <Compile Include="MasyuPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
