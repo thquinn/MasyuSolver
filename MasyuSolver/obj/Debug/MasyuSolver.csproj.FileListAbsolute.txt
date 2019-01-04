@@ -20,3 +20,4 @@ C:\Users\Cae\Desktop\MasyuSolver\MasyuSolver\obj\Debug\MasyuSolver.csproj.Genera
 C:\Users\Cae\Desktop\MasyuSolver\MasyuSolver\obj\Debug\MasyuSolver.csproj.CoreCompileInputs.cache
 C:\Users\Cae\Desktop\MasyuSolver\MasyuSolver\obj\Debug\MasyuSolver.exe
 C:\Users\Cae\Desktop\MasyuSolver\MasyuSolver\obj\Debug\MasyuSolver.pdb
+C:\Users\Cae\Desktop\Thumbini ACTIVE\Source Code\MasyuSolver\MasyuSolver\obj\Debug\MasyuSolver.Subforms.NewDialog.resources

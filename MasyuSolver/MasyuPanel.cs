@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Drawing.Drawing2D;
+using System.Diagnostics;
 
 namespace MasyuSolver {
     public partial class MasyuPanel : UserControl {
@@ -18,15 +19,16 @@ namespace MasyuSolver {
         int boardWidth, boardHeight;
         float cellSize, xBorder, yBorder;
 
+        public TextBox textBox;
+
         public MasyuPanel() {
             ResizeRedraw = true;
             InitializeComponent();
 
-            boardWidth = 14;
-            boardHeight = 24;
+            boardWidth = 12;
+            boardHeight = 12;
             board = new MasyuBoard(boardWidth, boardHeight);
         }
-
 
         protected override void OnMouseDown(MouseEventArgs e) {
             base.OnMouseClick(e);
@@ -36,7 +38,27 @@ namespace MasyuSolver {
                 return;
             }
             board.SetCircle(x, y, e.Button == MouseButtons.Right || ModifierKeys == Keys.Shift ? MasyuCircle.WHITE : MasyuCircle.BLACK);
-            board.Solve();
+            textBox.Clear();
+            board.PropagateConstaints(Log);
+            Invalidate();
+        }
+        public void Log(string s) {
+            if (textBox.TextLength > 0) {
+                textBox.Text += "\r\n";
+            }
+            textBox.Text += s;
+        }
+
+        // Menu items.
+        public void New(int boardWidth, int boardHeight) {
+            this.boardWidth = boardWidth;
+            this.boardHeight = boardHeight;
+            board = new MasyuBoard(boardWidth, boardHeight);
+            Invalidate();
+        }
+        public void Solve() {
+            textBox.Clear();
+            board.Solve(Log);
             Invalidate();
         }
 

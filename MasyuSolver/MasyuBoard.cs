@@ -44,11 +44,15 @@ namespace MasyuSolver
             new Tuple<string, string>("^.^", "^X^"),
         };
 
+        // STATE
         private byte[,] board;
+        private int activeLoopCount;
         private int[] loopEnds;
-        private List<int[]> loopEndLookups;
+        private List<int[]> loopEndLookups; // TODO: Turn this into just a long array, with pairs next to each other.
+
+        // PRECALCULATED RESOURCES
         private int[][] loopNeighborLookupTable;
-        private int[,] loopConnectorLookupTable;
+        private Dictionary<int, int[]> loopConnectorsLookupTable;
         private List<MasyuPattern>[,,] patternLookupTable;
 
         public MasyuBoard(int width, int height) {
@@ -81,7 +85,6 @@ namespace MasyuSolver
             }
 
             // TODO: Populate pattern lookup table with all rotations/reflections.
-            // TODO: Sort contradiction patterns to the front.
             patternLookupTable = new List<MasyuPattern>[arrWidth, arrHeight, 7];
             for (int x = 0; x < patternLookupTable.GetLength(0); x++)
             {
@@ -144,13 +147,59 @@ namespace MasyuSolver
             }
         }
 
-        public void Solve()
+        public void Solve(Action<string> Log) {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            // For each empty path space, try filling it.
+            string s = ToString();
+            for (int y = 1; y < board.GetLength(1) - 1; y++) {
+                for (int x = 1 + (y % 2); x < board.GetLength(0) - 1; x += 2) {
+                    if (board[x, y] != 0) {
+                        continue;
+                    }
+                    var backup = BackupState();
+                    board[x, y] = 3;
+                    PropagationResult result = PropagateConstraintsImpl(new Tuple<int, int>(x, y));
+                    RestoreBackup(backup);
+                    if (result == PropagationResult.CONTRADICTION) {
+                        board[x, y] = 4;
+                        PropagateConstraintsImpl(null);
+                        Solve(Log);
+                        return;
+                    }
+                }
+            }
+
+            // TODO: Test for regions with odd numbers of loose ends.
+            // TODO: Jordan Curve Theorem?
+            stopwatch.Stop();
+            Log("Finished searching at depth 1 in " + stopwatch.Elapsed + ".");
+        }
+        private Tuple<byte[,], int, int[], List<int[]>> BackupState() {
+            byte[,] backupBoard = new byte[board.GetLength(0), board.GetLength(1)];
+            Array.Copy(board, backupBoard, board.Length);
+            int[] backupLoopEnds = new int[loopEnds.Length];
+            Array.Copy(loopEnds, backupLoopEnds, backupLoopEnds.Length);
+            List<int[]> backupLoopEndLookups = loopEndLookups.ConvertAll(arr => new int[] { arr[0], arr[1] });
+            return new Tuple<byte[,], int, int[], List<int[]>>(backupBoard, activeLoopCount, backupLoopEnds, backupLoopEndLookups);
+        }
+        private void RestoreBackup(Tuple<byte[,], int, int[], List<int[]>> backup) {
+            board = backup.Item1;
+            activeLoopCount = backup.Item2;
+            loopEnds = backup.Item3;
+            loopEndLookups = backup.Item4;
+        }
+
+        public void PropagateConstaints(Action<string> Log)
         {
             Clear();
-            PropagateConstraints(null);
-            // TODO: Put Xs on segments that would close subloops.
-            // TODO: Test for contradictory regions with odd numbers of loose ends.
-            // TODO: Jordan Curve Theorem?
+            PropagationResult result = PropagateConstraintsImpl(null);
+            if (result == PropagationResult.CONTRADICTION) {
+                Log("Contradiction found during automatic constraint propagation.");
+            } else {
+                Log("Constaints propagated.");
+            }
         }
         private void Clear()
         {
@@ -165,16 +214,23 @@ namespace MasyuSolver
                 }
             }
             Array.Clear(loopEnds, 0, loopEnds.Length);
+            activeLoopCount = 0;
             loopEndLookups.Clear();
             loopEndLookups.Add(new int[] { -1, -1 });
         }
-        private PropagationResult PropagateConstraints(Tuple<int, int> placed)
+        private PropagationResult PropagateConstraintsImpl(Tuple<int, int> placed)
         {
             bool constraintsApplied = false;
             Queue<Tuple<int, int>> newFeatureCoors = new Queue<Tuple<int, int>>();
             if (placed != null)
             {
                 newFeatureCoors.Enqueue(placed);
+                if (board[placed.Item1, placed.Item2] == 3) {
+                    Tuple<int, int> shortCircuit = AddSegment(placed.Item1, placed.Item2);
+                    if (shortCircuit != null) {
+                        newFeatureCoors.Enqueue(shortCircuit);
+                    }
+                }
             }
             // If no coordinate is provided, it's our first propagation. Start with all circles.
             else
@@ -282,6 +338,7 @@ namespace MasyuSolver
                     loopEnds[firstLoopLookup[1]] = mergedNeighbor;
                     loopLookup[0] = -1;
                     loopLookup[1] = -1;
+                    activeLoopCount--;
                 } else {
                     // The third loop end found... we got a contradiction.
                     return new Tuple<int, int>(-1, -1);
@@ -291,11 +348,12 @@ namespace MasyuSolver
             if (connectionCount == 0) {
                 loopEnds[index] = loopEndLookups.Count;
                 loopEndLookups.Add(new int[] { index, index });
+                activeLoopCount++;
             }
             // If we found one or more, check the final merged loop against a precalculated resource to find the segment that would join it.
             // If such a segment exists, mark it with an X.
-            // TODO: Don't do this if all circles have been passed through and there's only one active loop.
-            else {
+            // TODO: Still gotta check this if there are unused circles.
+            else if (activeLoopCount > 1) {
                 int[] lookup = loopEndLookups[mergedNeighbor];
                 // TODO: Precompute this.
                 foreach (int intersection in loopNeighborLookupTable[lookup[0]].Intersect(loopNeighborLookupTable[lookup[1]])) {
@@ -305,15 +363,6 @@ namespace MasyuSolver
                         board[rx, ry] = 4;
                         return new Tuple<int, int>(rx, ry);
                     }
-                }
-            }
-
-            // DEBUG
-            foreach (int[] lookup in loopEndLookups) {
-                if (lookup[0] == -1)
-                    continue;
-                if (loopEnds[lookup[0]] != loopEnds[lookup[1]]) {
-                    int i = 9;
                 }
             }
 
