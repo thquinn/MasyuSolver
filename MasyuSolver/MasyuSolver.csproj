@@ -45,11 +45,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Form1.cs">
+    <Compile Include="MasyuForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="MasyuForm.Designer.cs">
+      <DependentUpon>MasyuForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MasyuBoard.cs" />
     <Compile Include="MasyuPanel.cs">
@@ -67,8 +67,8 @@
       <DependentUpon>NewDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Util.cs" />
-    <EmbeddedResource Include="Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <EmbeddedResource Include="MasyuForm.resx">
+      <DependentUpon>MasyuForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MasyuPanel.resx">
       <DependentUpon>MasyuPanel.cs</DependentUpon>

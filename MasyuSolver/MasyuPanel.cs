@@ -19,7 +19,7 @@ namespace MasyuSolver {
         int boardWidth, boardHeight;
         float cellSize, xBorder, yBorder;
 
-        public TextBox textBox;
+        public MasyuForm form;
 
         public MasyuPanel() {
             ResizeRedraw = true;
@@ -38,15 +38,36 @@ namespace MasyuSolver {
                 return;
             }
             board.SetCircle(x, y, e.Button == MouseButtons.Right || ModifierKeys == Keys.Shift ? MasyuCircle.WHITE : MasyuCircle.BLACK);
-            textBox.Clear();
-            board.PropagateConstaints(Log);
+            Solve();
+        }
+        public void Solve() {
+            form.logBox.Clear();
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            if (form.solveDepth == 0) {
+                board.Clear();
+                Invalidate();
+                return;
+            }
+            else if (form.solveDepth == 1) {
+                board.PropagateConstaints(Log);
+            }
+            else if (form.solveDepth == 2) {
+                board.PropagateConstaints(Log);
+                board.Solve(Log);
+            }
+
+            stopwatch.Stop();
+            Log("Finished in " + stopwatch.Elapsed.TotalSeconds + " seconds.");
+            form.UpdateValidity(board.valid);
             Invalidate();
         }
         public void Log(string s) {
-            if (textBox.TextLength > 0) {
-                textBox.Text += "\r\n";
+            if (form.logBox.TextLength > 0) {
+                form.logBox.Text += "\r\n";
             }
-            textBox.Text += s;
+            form.logBox.Text += s;
         }
 
         // Menu items.
@@ -54,11 +75,6 @@ namespace MasyuSolver {
             this.boardWidth = boardWidth;
             this.boardHeight = boardHeight;
             board = new MasyuBoard(boardWidth, boardHeight);
-            Invalidate();
-        }
-        public void Solve() {
-            textBox.Clear();
-            board.Solve(Log);
             Invalidate();
         }
 

@@ -8,6 +8,12 @@ namespace MasyuSolver
 {
     public class MasyuBoard {
         public static char[] CHARS = new char[] { '.', 'Q', 'O', '-', 'X', 'v', '^', '*' };
+        // TODO: Test subsets and different orderings for performance.
+        // TODO: Also test feature-testing order WITHIN each pattern.
+        // TODO: There are certain circle patterns that should be removed, if the pattern of circles isn't present anywhere on the board.
+        // TODO: Conversely, patterns featuring exclusively circles only add constant time to the search. We might want to add all we can find.
+        // TODO: But... the way I'm finding these is with search anyway. Search is finding them. Does it save much time on average to hardcode them?
+        // TODO: There are certain situations where patterns can be removed from the map after a certain amount of progress has been made.
         static Tuple<string, string>[] PATTERN_STRING_PAIRS = new Tuple<string, string>[] {
             // completing lines through circles
             new Tuple<string, string>("....\nQ-..\n....", "..X.\nQ-.-\n..X."),
@@ -19,6 +25,8 @@ namespace MasyuSolver
             new Tuple<string, string>(".-.\n-*.\n...", ".-.\n-.X\n.X."),
             new Tuple<string, string>(".-.\n.*.\n.-.", ".-.\nX.X\n.-."),
             new Tuple<string, string>(".X.\nX*X\n...", ".X.\nX.X\n.X."),
+            // black circle rule
+            new Tuple<string, string>("-Q.", "-QX"),
             // black circles blocked by features
             new Tuple<string, string>(".....\nXQ...\n.....", "...X.\nXQ-.-\n...X."),
             new Tuple<string, string>(".......\nX..Q...\n.......", ".....X.\nX.XQ-.-\n.....X."),
@@ -44,6 +52,8 @@ namespace MasyuSolver
             new Tuple<string, string>("^.^", "^X^"),
         };
 
+        public bool valid = true;
+
         // STATE
         private byte[,] board;
         private int activeLoopCount;
@@ -52,7 +62,6 @@ namespace MasyuSolver
 
         // PRECALCULATED RESOURCES
         private int[][] loopNeighborLookupTable;
-        private Dictionary<int, int[]> loopConnectorsLookupTable;
         private List<MasyuPattern>[,,] patternLookupTable;
 
         public MasyuBoard(int width, int height) {
@@ -84,7 +93,6 @@ namespace MasyuSolver
                 }
             }
 
-            // TODO: Populate pattern lookup table with all rotations/reflections.
             patternLookupTable = new List<MasyuPattern>[arrWidth, arrHeight, 7];
             for (int x = 0; x < patternLookupTable.GetLength(0); x++)
             {
@@ -147,34 +155,48 @@ namespace MasyuSolver
             }
         }
 
-        public void Solve(Action<string> Log) {
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
+        public bool Solve(int depth, Action<string> Log) {
+            // We can do a traditional iterative deepening search, but it has to test subsets of possibilities:
+            // for a circle, can it extend either this way or this way? For a loop end, can it extend this way or this way?
 
+            // Or... can we somehow just do normal iterative deepening? Testing possibilities on difficult puzzles seems to
+            // yield results on depth 1.
+            return true;
+        }
+
+        public void Solve(Action<string> Log) {
             // For each empty path space, try filling it.
-            string s = ToString();
-            for (int y = 1; y < board.GetLength(1) - 1; y++) {
-                for (int x = 1 + (y % 2); x < board.GetLength(0) - 1; x += 2) {
-                    if (board[x, y] != 0) {
-                        continue;
-                    }
-                    var backup = BackupState();
-                    board[x, y] = 3;
-                    PropagationResult result = PropagateConstraintsImpl(new Tuple<int, int>(x, y));
-                    RestoreBackup(backup);
-                    if (result == PropagationResult.CONTRADICTION) {
-                        board[x, y] = 4;
-                        PropagateConstraintsImpl(null);
-                        Solve(Log);
-                        return;
+            bool changed = false;
+            for (byte feature = 3; feature <= 4; feature++) {
+                for (int y = 1; y < board.GetLength(1) - 1; y++) {
+                    for (int x = 1 + (y % 2); x < board.GetLength(0) - 1; x += 2) {
+                        if (board[x, y] != 0) {
+                            continue;
+                        }
+                        var backup = BackupState();
+                        board[x, y] = feature;
+                        PropagationResult result = PropagateConstraintsImpl(new Tuple<int, int>(x, y));
+                        RestoreBackup(backup);
+                        if (result != PropagationResult.CONTRADICTION && CheckNonPatternContradictions()) {
+                            result = PropagationResult.CONTRADICTION;
+                        }
+                        if (result == PropagationResult.CONTRADICTION) {
+                            board[x, y] = feature == 3 ? (byte)4 : (byte)3;
+                            PropagateConstraintsImpl(new Tuple<int, int>(x, y));
+                            changed = true;
+                        }
                     }
                 }
             }
+            if (changed) {
+                Solve(Log);
+                return;
+            }
+            valid = PropagateConstraintsImpl(null) != PropagationResult.CONTRADICTION;
 
-            // TODO: Test for regions with odd numbers of loose ends.
-            // TODO: Jordan Curve Theorem?
-            stopwatch.Stop();
-            Log("Finished searching at depth 1 in " + stopwatch.Elapsed + ".");
+            // TODO: Contradictions aren't being displayed.
+            // TODO: Parallelize.
+            Log("Searched to depth 1.");
         }
         private Tuple<byte[,], int, int[], List<int[]>> BackupState() {
             byte[,] backupBoard = new byte[board.GetLength(0), board.GetLength(1)];
@@ -196,12 +218,14 @@ namespace MasyuSolver
             Clear();
             PropagationResult result = PropagateConstraintsImpl(null);
             if (result == PropagationResult.CONTRADICTION) {
-                Log("Contradiction found during automatic constraint propagation.");
+                valid = false;
+                Log("Contradiction found during constraint propagation.");
             } else {
+                valid = true;
                 Log("Constaints propagated.");
             }
         }
-        private void Clear()
+        public void Clear()
         {
             for (int y = 1; y < board.GetLength(1) - 1; y++)
             {
@@ -235,16 +259,22 @@ namespace MasyuSolver
             // If no coordinate is provided, it's our first propagation. Start with all circles.
             else
             {
-                for (int x = 1; x < board.GetLength(0) - 1; x += 2)
+                for (int x = 1; x < board.GetLength(0) - 1; x++)
                 {
-                    for (int y = 1; y < board.GetLength(1) - 1; y += 2)
+                    for (int y = 1; y < board.GetLength(1) - 1; y++)
                     {
-                        if (board[x, y] == 1 || board[x, y] == 2)
+                        if (board[x, y] > 0)
                         {
                             newFeatureCoors.Enqueue(new Tuple<int, int>(x, y));
                         }
                     }
                 }
+                // Also add some corner Xs for the all-square variant.
+                // TODO: Only do this when the variant is actually active.
+                newFeatureCoors.Enqueue(new Tuple<int, int>(0, 1));
+                newFeatureCoors.Enqueue(new Tuple<int, int>(0, board.GetLength(1) - 2));
+                newFeatureCoors.Enqueue(new Tuple<int, int>(board.GetLength(0) - 1, 1));
+                newFeatureCoors.Enqueue(new Tuple<int, int>(board.GetLength(0) - 1, board.GetLength(1) - 2));
             }
             // Propagate.
             while (newFeatureCoors.Count > 0)
@@ -268,7 +298,6 @@ namespace MasyuSolver
                         continue;
                     }
                     // Apply the pattern.
-                    // TODO: Contradiction patterns.
                     for (int i = 0; i < pattern.set.Length; i++)
                     {
                         Tuple<int, int, byte> currentPattern = pattern.set[i];
@@ -367,6 +396,15 @@ namespace MasyuSolver
             }
 
             return null;
+        }
+
+        private bool CheckNonPatternContradictions() {
+            // For all of these, we really only want to test stuff that was just added in the last constraint prop.
+            // TODO: See what loop ends each loop end has access to. If any loop ends can only find their other end, contradiction.
+            // TODO: Test for regions with odd numbers of loose ends.
+            // TODO: If we can find a edge-to-edge string of outs that has line segments on either side, it's a contradiction.
+            // TODO: Jordan Curve Theorem?
+            return false;
         }
 
         public void SetCircle(int x, int y, MasyuCircle circle)

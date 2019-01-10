@@ -6,7 +6,6 @@ C:\Users\Cae\Desktop\Thumbini ACTIVE\Source Code\MasyuSolver\MasyuSolver\obj\Deb
 C:\Users\Cae\Desktop\Thumbini ACTIVE\Source Code\MasyuSolver\MasyuSolver\obj\Debug\MasyuSolver.csproj.CoreCompileInputs.cache
 C:\Users\Cae\Desktop\Thumbini ACTIVE\Source Code\MasyuSolver\MasyuSolver\obj\Debug\MasyuSolver.exe
 C:\Users\Cae\Desktop\Thumbini ACTIVE\Source Code\MasyuSolver\MasyuSolver\obj\Debug\MasyuSolver.pdb
-C:\Users\Cae\Desktop\Thumbini ACTIVE\Source Code\MasyuSolver\MasyuSolver\obj\Debug\MasyuSolver.Form1.resources
 C:\Users\Cae\Desktop\Thumbini ACTIVE\Source Code\MasyuSolver\MasyuSolver\obj\Debug\MasyuSolver.MasyuPanel.resources
 C:\Users\Cae\Desktop\Thumbini ACTIVE\Source Code\MasyuSolver\MasyuSolver\obj\Debug\MasyuSolver.csprojAssemblyReference.cache
 C:\Users\Cae\Desktop\MasyuSolver\MasyuSolver\bin\Debug\MasyuSolver.exe.config
@@ -21,3 +20,4 @@ C:\Users\Cae\Desktop\MasyuSolver\MasyuSolver\obj\Debug\MasyuSolver.csproj.CoreCo
 C:\Users\Cae\Desktop\MasyuSolver\MasyuSolver\obj\Debug\MasyuSolver.exe
 C:\Users\Cae\Desktop\MasyuSolver\MasyuSolver\obj\Debug\MasyuSolver.pdb
 C:\Users\Cae\Desktop\Thumbini ACTIVE\Source Code\MasyuSolver\MasyuSolver\obj\Debug\MasyuSolver.Subforms.NewDialog.resources
+C:\Users\Cae\Desktop\Thumbini ACTIVE\Source Code\MasyuSolver\MasyuSolver\obj\Debug\MasyuSolver.MasyuForm.resources
