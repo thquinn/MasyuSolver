@@ -148,8 +148,12 @@ namespace MasyuSolver
         }
 
         public void Solve(Action<string> Log, int depth) {
-            SolveImpl(Log, depth);
+            Clear();
+            PropagateConstraintsImpl(null);
             Log("Searched to depth " + (depth + 1) + ".");
+            if (depth >= 0) {
+                SolveImpl(Log, depth);
+            }
         }
         public void SolveImpl(Action<string> Log, int depth) {
             // For each empty path space, try filling it.
@@ -209,18 +213,6 @@ namespace MasyuSolver
             loopEndLookups = backup.Item4;
         }
 
-        public void PropagateConstaints(Action<string> Log)
-        {
-            Clear();
-            PropagationResult result = PropagateConstraintsImpl(null);
-            if (result == PropagationResult.CONTRADICTION) {
-                valid = false;
-                Log("Contradiction found during constraint propagation.");
-            } else {
-                valid = true;
-                Log("Constaints propagated.");
-            }
-        }
         public void Clear()
         {
             for (int y = 1; y < board.GetLength(1) - 1; y++)

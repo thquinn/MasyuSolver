@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Drawing.Drawing2D;
 using System.Diagnostics;
@@ -42,25 +36,17 @@ namespace MasyuSolver {
         }
         public void Solve() {
             form.logBox.Clear();
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
 
             if (form.solveDepth == 0) {
                 board.Clear();
                 Invalidate();
                 return;
             }
-            else if (form.solveDepth == 1) {
-                board.PropagateConstaints(Log);
-            }
-            else if (form.solveDepth == 2) {
-                board.PropagateConstaints(Log);
-                board.Solve(Log, 0);
-            }
-            else if (form.solveDepth == 3) {
-                board.PropagateConstaints(Log);
-                board.Solve(Log, 1);
-            }
+
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            board.Solve(Log, form.solveDepth - 2);
 
             stopwatch.Stop();
             Log("Finished in " + stopwatch.Elapsed.TotalSeconds + " seconds.");
