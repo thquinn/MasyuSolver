@@ -52,7 +52,7 @@ namespace MasyuSolver
             new Tuple<string, string>("^.^", "^X^"),
         };
 
-        public bool valid = true;
+        private bool valid = true;
 
         // STATE
         private byte[,] board;
@@ -94,35 +94,29 @@ namespace MasyuSolver
             }
 
             patternLookupTable = new List<MasyuPattern>[arrWidth, arrHeight, 7];
-            for (int x = 0; x < patternLookupTable.GetLength(0); x++)
-            {
-                for (int y = 0; y < patternLookupTable.GetLength(1); y++)
-                {
-                    for (int z = 0; z < patternLookupTable.GetLength(2); z++)
-                    {
+            for (int x = 0; x < patternLookupTable.GetLength(0); x++) {
+                for (int y = 0; y < patternLookupTable.GetLength(1); y++) {
+                    for (int z = 0; z < patternLookupTable.GetLength(2); z++) {
                         patternLookupTable[x, y, z] = new List<MasyuPattern>();
                     }
                 }
             }
             // TODO: Can't we avoid centering patterns on spaces where that type of piece cannot appear? Won't save much space, though.
             // TODO: Look into precomputing coordinates so we don't need to add offsets. Would multiply memory usage by the size of the board...
-            foreach (Tuple<string, string> patternStringPair in PATTERN_STRING_PAIRS)
-            {
+            foreach (Tuple<string, string> patternStringPair in PATTERN_STRING_PAIRS) {
                 Debug.Assert(patternStringPair.Item1.Length == patternStringPair.Item2.Length);
                 Tuple<int, int, byte>[] checkPattern = Util.ParsePatternString(patternStringPair.Item1);
                 Tuple<int, int, byte>[] setPattern = Util.ParsePatternString(patternStringPair.Item2);
                 List<Tuple<int, int, byte, bool>> combined = new List<Tuple<int, int, byte, bool>>(checkPattern.Select(t => new Tuple<int, int, byte, bool>(t.Item1, t.Item2, t.Item3, false)));
                 combined.AddRange(setPattern.Except(checkPattern).Select(t => new Tuple<int, int, byte, bool>(t.Item1, t.Item2, t.Item3, true)));
                 Tuple<int, int, byte, bool>[][] patternRotations = Util.AllPatternRotationsAndReflections(combined);
-                foreach (Tuple<int, int, byte, bool>[] rotation in patternRotations)
-                {
+                foreach (Tuple<int, int, byte, bool>[] rotation in patternRotations) {
                     int maxX = rotation.Max(t => t.Item1);
                     int maxY = rotation.Max(t => t.Item2);
                     Tuple<int, int, byte>[] check = rotation.Where(t => !t.Item4).Select(t => new Tuple<int, int, byte>(t.Item1, t.Item2, t.Item3)).ToArray();
                     Tuple<int, int, byte>[] set = rotation.Where(t => t.Item4).Select(t => new Tuple<int, int, byte>(t.Item1, t.Item2, t.Item3)).ToArray();
                     // For each checked feature, create a pattern with it at its center.
-                    foreach (Tuple<int, int, byte> checkFeature in check)
-                    {
+                    foreach (Tuple<int, int, byte> checkFeature in check) {
                         if (checkFeature.Item3 == 7) {
                             continue;
                         }
@@ -135,10 +129,8 @@ namespace MasyuSolver
                         // Store each recentered pattern wherever it will fit in the table.
                         int rightMargin = maxX - checkFeature.Item1;
                         int bottomMargin = maxY - checkFeature.Item2;
-                        for (int x = checkFeature.Item1; x < patternLookupTable.GetLength(0) - rightMargin; x++)
-                        {
-                            for (int y = checkFeature.Item2; y < patternLookupTable.GetLength(1) - bottomMargin; y++)
-                            {
+                        for (int x = checkFeature.Item1; x < patternLookupTable.GetLength(0) - rightMargin; x++) {
+                            for (int y = checkFeature.Item2; y < patternLookupTable.GetLength(1) - bottomMargin; y++) {
                                 // If we had a '*', don't add this pattern in a place that would make it fall not on a circle space.
                                 if (starTuple != null) {
                                     int cx = x - checkFeature.Item1 + starTuple.Item1, cy = y - checkFeature.Item2 + starTuple.Item2;
@@ -155,16 +147,11 @@ namespace MasyuSolver
             }
         }
 
-        public bool Solve(int depth, Action<string> Log) {
-            // We can do a traditional iterative deepening search, but it has to test subsets of possibilities:
-            // for a circle, can it extend either this way or this way? For a loop end, can it extend this way or this way?
-
-            // Or... can we somehow just do normal iterative deepening? Testing possibilities on difficult puzzles seems to
-            // yield results on depth 1.
-            return true;
+        public void Solve(Action<string> Log, int depth) {
+            SolveImpl(Log, depth);
+            Log("Searched to depth " + (depth + 1) + ".");
         }
-
-        public void Solve(Action<string> Log) {
+        public void SolveImpl(Action<string> Log, int depth) {
             // For each empty path space, try filling it.
             bool changed = false;
             for (byte feature = 3; feature <= 4; feature++) {
@@ -173,13 +160,24 @@ namespace MasyuSolver
                         if (board[x, y] != 0) {
                             continue;
                         }
+                        if (board[x - 1, y] == 2 || board[x, y - 1] == 2) {
+                            // Small optimization: don't need to check both sides of a white circle.
+                            continue;
+                        }
                         var backup = BackupState();
                         board[x, y] = feature;
                         PropagationResult result = PropagateConstraintsImpl(new Tuple<int, int>(x, y));
-                        RestoreBackup(backup);
                         if (result != PropagationResult.CONTRADICTION && CheckNonPatternContradictions()) {
                             result = PropagationResult.CONTRADICTION;
                         }
+                        if (result != PropagationResult.CONTRADICTION && depth > 0) {
+                            SolveImpl(Log, depth - 1);
+                            if (!valid) {
+                                result = PropagationResult.CONTRADICTION;
+                            }
+                        }
+                        RestoreBackup(backup);
+
                         if (result == PropagationResult.CONTRADICTION) {
                             board[x, y] = feature == 3 ? (byte)4 : (byte)3;
                             PropagateConstraintsImpl(new Tuple<int, int>(x, y));
@@ -189,14 +187,12 @@ namespace MasyuSolver
                 }
             }
             if (changed) {
-                Solve(Log);
+                // TODO: Make this iterative. No reason to keep stack frames and risk overflow.
+                SolveImpl(Log, depth);
                 return;
             }
             valid = PropagateConstraintsImpl(null) != PropagationResult.CONTRADICTION;
-
-            // TODO: Contradictions aren't being displayed.
             // TODO: Parallelize.
-            Log("Searched to depth 1.");
         }
         private Tuple<byte[,], int, int[], List<int[]>> BackupState() {
             byte[,] backupBoard = new byte[board.GetLength(0), board.GetLength(1)];
@@ -252,6 +248,9 @@ namespace MasyuSolver
                 if (board[placed.Item1, placed.Item2] == 3) {
                     Tuple<int, int> shortCircuit = AddSegment(placed.Item1, placed.Item2);
                     if (shortCircuit != null) {
+                        if (shortCircuit.Item1 == -1) {
+                            return PropagationResult.CONTRADICTION;
+                        }
                         newFeatureCoors.Enqueue(shortCircuit);
                     }
                 }
@@ -384,6 +383,11 @@ namespace MasyuSolver
             // TODO: Still gotta check this if there are unused circles.
             else if (activeLoopCount > 1) {
                 int[] lookup = loopEndLookups[mergedNeighbor];
+                if (lookup[0] == -1) {
+                    // A subloop has closed itself. Contradiction.
+                    // TODO: Is this legit?
+                    return new Tuple<int, int>(-1, -1);
+                }
                 // TODO: Precompute this.
                 foreach (int intersection in loopNeighborLookupTable[lookup[0]].Intersect(loopNeighborLookupTable[lookup[1]])) {
                     int rx = intersection % board.GetLength(0);
@@ -458,6 +462,35 @@ namespace MasyuSolver
             Debug.Assert(val == 0);
             return MasyuInOut.UNKNOWN;
         }
+        public MasyuValidity GetValidity() {
+            if (valid) {
+                return IsComplete() ? MasyuValidity.COMPLETE : MasyuValidity.VALID;
+            }
+            return MasyuValidity.INVALID;
+        }
+        private bool IsComplete() {
+            if (activeLoopCount > 0) {
+                return false;
+            }
+            bool empty = true;
+            for (int y = 1; y < board.GetLength(1) - 1; y += 2) {
+                for (int x = 1; x < board.GetLength(0) - 1; x += 2) {
+                    if (board[x, y] == 0) {
+                        continue;
+                    }
+                    empty = false;
+                    int count = 0;
+                    count += board[x - 1, y] == 3 ? 1 : 0;
+                    count += board[x + 1, y] == 3 ? 1 : 0;
+                    count += board[x, y - 1] == 3 ? 1 : 0;
+                    count += board[x, y + 1] == 3 ? 1 : 0;
+                    if (count != 2) {
+                        return false;
+                    }
+                }
+            }
+            return !empty;
+        }
 
         private StringBuilder sb;
         public override string ToString()
@@ -504,5 +537,8 @@ namespace MasyuSolver
     }
     enum PropagationResult {
         CONSTRAINTS_APPLIED, NO_CONSTRAINTS_APPLIED, CONTRADICTION
+    }
+    public enum MasyuValidity {
+        INVALID, VALID, COMPLETE
     }
 }

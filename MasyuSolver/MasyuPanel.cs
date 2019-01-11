@@ -55,12 +55,16 @@ namespace MasyuSolver {
             }
             else if (form.solveDepth == 2) {
                 board.PropagateConstaints(Log);
-                board.Solve(Log);
+                board.Solve(Log, 0);
+            }
+            else if (form.solveDepth == 3) {
+                board.PropagateConstaints(Log);
+                board.Solve(Log, 1);
             }
 
             stopwatch.Stop();
             Log("Finished in " + stopwatch.Elapsed.TotalSeconds + " seconds.");
-            form.UpdateValidity(board.valid);
+            form.UpdateValidity(board.GetValidity());
             Invalidate();
         }
         public void Log(string s) {

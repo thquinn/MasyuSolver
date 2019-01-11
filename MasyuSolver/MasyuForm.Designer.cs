@@ -41,6 +41,10 @@
             this.label1 = new System.Windows.Forms.Label();
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
+            this.menuItem8 = new System.Windows.Forms.MenuItem();
+            this.menuItem9 = new System.Windows.Forms.MenuItem();
+            this.menuItem14 = new System.Windows.Forms.MenuItem();
+            this.menuItem15 = new System.Windows.Forms.MenuItem();
             this.masyuPanel = new MasyuSolver.MasyuPanel();
             this.SuspendLayout();
             // 
@@ -48,6 +52,7 @@
             // 
             this.mainMenu1.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuItem1,
+            this.menuItem9,
             this.menuItem4,
             this.menuItem10});
             // 
@@ -79,7 +84,7 @@
             // 
             // menuItem4
             // 
-            this.menuItem4.Index = 1;
+            this.menuItem4.Index = 2;
             this.menuItem4.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuItem5});
             this.menuItem4.Text = "Solve";
@@ -90,7 +95,8 @@
             this.menuItem5.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuItem3,
             this.menuItem6,
-            this.menuItem7});
+            this.menuItem7,
+            this.menuItem8});
             this.menuItem5.Text = "Depth";
             // 
             // menuItem3
@@ -119,7 +125,7 @@
             // 
             // menuItem10
             // 
-            this.menuItem10.Index = 2;
+            this.menuItem10.Index = 3;
             this.menuItem10.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuItem11});
             this.menuItem10.Text = "Construct";
@@ -134,7 +140,7 @@
             this.logBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.logBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.logBox.Location = new System.Drawing.Point(13, 773);
+            this.logBox.Location = new System.Drawing.Point(13, 776);
             this.logBox.Multiline = true;
             this.logBox.Name = "logBox";
             this.logBox.ReadOnly = true;
@@ -145,7 +151,7 @@
             // 
             this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox1.BackColor = System.Drawing.Color.White;
-            this.textBox1.Location = new System.Drawing.Point(662, 792);
+            this.textBox1.Location = new System.Drawing.Point(662, 795);
             this.textBox1.Name = "textBox1";
             this.textBox1.ReadOnly = true;
             this.textBox1.Size = new System.Drawing.Size(97, 20);
@@ -157,7 +163,7 @@
             // 
             this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(616, 795);
+            this.label1.Location = new System.Drawing.Point(616, 798);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(40, 13);
             this.label1.TabIndex = 3;
@@ -166,22 +172,48 @@
             // textBox2
             // 
             this.textBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox2.Location = new System.Drawing.Point(662, 821);
+            this.textBox2.Location = new System.Drawing.Point(662, 824);
             this.textBox2.Name = "textBox2";
             this.textBox2.ReadOnly = true;
             this.textBox2.Size = new System.Drawing.Size(97, 20);
             this.textBox2.TabIndex = 2;
+            this.textBox2.Text = "1";
             this.textBox2.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // label2
             // 
             this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(619, 824);
+            this.label2.Location = new System.Drawing.Point(619, 827);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(36, 13);
             this.label2.TabIndex = 3;
             this.label2.Text = "Depth";
+            // 
+            // menuItem8
+            // 
+            this.menuItem8.Index = 3;
+            this.menuItem8.Shortcut = System.Windows.Forms.Shortcut.Ctrl3;
+            this.menuItem8.Text = "2";
+            this.menuItem8.Click += new System.EventHandler(this.Menu_SolveDepth);
+            // 
+            // menuItem9
+            // 
+            this.menuItem9.Index = 1;
+            this.menuItem9.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.menuItem14,
+            this.menuItem15});
+            this.menuItem9.Text = "Edit";
+            // 
+            // menuItem14
+            // 
+            this.menuItem14.Index = 0;
+            this.menuItem14.Text = "Undo";
+            // 
+            // menuItem15
+            // 
+            this.menuItem15.Index = 1;
+            this.menuItem15.Text = "Redo";
             // 
             // masyuPanel
             // 
@@ -191,14 +223,14 @@
             this.masyuPanel.BackColor = System.Drawing.Color.White;
             this.masyuPanel.Location = new System.Drawing.Point(12, 12);
             this.masyuPanel.Name = "masyuPanel";
-            this.masyuPanel.Size = new System.Drawing.Size(747, 749);
+            this.masyuPanel.Size = new System.Drawing.Size(747, 752);
             this.masyuPanel.TabIndex = 0;
             // 
             // MasyuForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(771, 871);
+            this.ClientSize = new System.Drawing.Size(771, 874);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.textBox2);
             this.Controls.Add(this.label1);
@@ -235,6 +267,10 @@
         private System.Windows.Forms.MenuItem menuItem11;
         private System.Windows.Forms.MenuItem menuItem12;
         private System.Windows.Forms.MenuItem menuItem13;
+        private System.Windows.Forms.MenuItem menuItem8;
+        private System.Windows.Forms.MenuItem menuItem9;
+        private System.Windows.Forms.MenuItem menuItem14;
+        private System.Windows.Forms.MenuItem menuItem15;
     }
 }
 

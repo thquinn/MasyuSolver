@@ -12,8 +12,12 @@ namespace MasyuSolver {
             solveDepth = 2;
         }
 
-        public void UpdateValidity(bool valid) {
-            if (valid) {
+        public void UpdateValidity(MasyuValidity validity) {
+            if (validity == MasyuValidity.COMPLETE) {
+                textBox1.Text = "COMPLETE";
+                textBox1.BackColor = System.Drawing.Color.Green;
+                textBox1.ForeColor = System.Drawing.Color.White;
+            } else if (validity == MasyuValidity.VALID) {
                 textBox1.Text = "VALID";
                 textBox1.BackColor = System.Drawing.Color.White;
                 textBox1.ForeColor = System.Drawing.Color.Black;
@@ -35,12 +39,13 @@ namespace MasyuSolver {
             if (menuItem.Checked) {
                 return;
             }
-            MenuItem[] solveDepthItems = new MenuItem[] { menuItem3, menuItem6, menuItem7 };
+            MenuItem[] solveDepthItems = new MenuItem[] { menuItem3, menuItem6, menuItem7, menuItem8 };
             for (int i = 0; i < solveDepthItems.Length; i++) {
                 MenuItem solveDepthItem = solveDepthItems[i];
                 if (menuItem == solveDepthItem) {
                     solveDepthItem.Checked = true;
                     solveDepth = i;
+                    textBox2.Text = solveDepthItem.Text;
                 } else {
                     solveDepthItem.Checked = false;
                 }
